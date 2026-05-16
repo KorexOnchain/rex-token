@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Add ETH to Wallet</title>
+  <title>Add Rex Testnet to MetaMask</title>
   <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -144,8 +144,8 @@
       <polygon fill="#F5841F" points="0,43.006 8.463,84.308 2.84,82.145 11.783,89.038 4.894,94.427 13.837,102.713 8.249,106.806 21.651,122.174 81.885,104.482 120.456,78.443 14.112,0.002"/>
     </svg>
 
-    <p class="token-name">ETH Token</p>
-    <p class="token-symbol">ETH</p>
+    <p class="token-name">Rex Testnet</p>
+    <p class="token-symbol">Add network to your wallet</p>
 
     <button class="btn btn-metamask" onclick="addMetaMask()">
       <svg class="btn-icon" viewBox="0 0 256 240" xmlns="http://www.w3.org/2000/svg">
@@ -169,24 +169,26 @@
     <hr class="divider">
 
     <div class="meta-row">
-      <span class="meta-label">Contract</span>
-      <span class="meta-value">0xaF818E...272842</span>
+      <span class="meta-label">Network Name</span>
+      <span class="meta-value" style="font-family: 'Segoe UI', sans-serif;">Rex Testnet</span>
     </div>
     <div class="meta-row">
-      <span class="meta-label">Symbol</span>
+      <span class="meta-label">Chain ID</span>
+      <span class="meta-value">9991</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">Currency</span>
       <span class="meta-value">ETH</span>
-    </div>
-    <div class="meta-row">
-      <span class="meta-label">Decimals</span>
-      <span class="meta-value">18</span>
     </div>
   </div>
 
   <script>
-    const TOKEN = {
-      address: '0xaF818E626b262ba3D85c679EF2218A9074272842',
-      symbol: 'ETH',
-      decimals: 18,
+    const NETWORK = {
+      chainId: '0x2707',
+      chainName: 'Rex Testnet',
+      nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+      rpcUrls: ['https://virtual.mainnet.eu.rpc.tenderly.co/d68f8fc9-35e6-46c9-b43d-c8fe52ce1c84'],
+      blockExplorerUrls: [],
     };
 
     const WC_PROJECT_ID = '80f8a3f7538625ec83a8ac64b60931eb';
@@ -203,17 +205,17 @@
         return;
       }
       try {
-        const wasAdded = await window.ethereum.request({
-          method: 'wallet_watchAsset',
-          params: { type: 'ERC20', options: TOKEN },
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [NETWORK],
         });
-        if (wasAdded) {
-          setStatus('ETH successfully added to MetaMask!', 'success');
-        } else {
-          setStatus('Token addition was cancelled.');
-        }
+        setStatus('Rex Testnet successfully added to MetaMask!', 'success');
       } catch (err) {
-        setStatus('Something went wrong. Please try again.', 'error');
+        if (err.code === 4001) {
+          setStatus('Network addition was cancelled.');
+        } else {
+          setStatus('Something went wrong. Please try again.', 'error');
+        }
       }
     }
 
@@ -230,16 +232,12 @@
 
         await provider.enable();
 
-        const wasAdded = await provider.request({
-          method: 'wallet_watchAsset',
-          params: { type: 'ERC20', options: TOKEN },
+        await provider.request({
+          method: 'wallet_addEthereumChain',
+          params: [NETWORK],
         });
 
-        if (wasAdded) {
-          setStatus('ETH successfully added to your wallet!', 'success');
-        } else {
-          setStatus('Token addition was cancelled.');
-        }
+        setStatus('Rex Testnet successfully added to your wallet!', 'success');
       } catch (err) {
         if (err.message && err.message.includes('User closed')) {
           setStatus('Connection cancelled.');
