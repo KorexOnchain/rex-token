@@ -3,189 +3,367 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Add ETH to MetaMask</title>
-  <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+  <title>Ethereum</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@walletconnect/modal@2.7.0/dist/index.umd.js"></script>
+  <script src="https://unpkg.com/@walletconnect/sign-client@2.17.0/dist/index.umd.js"></script>
   <style>
+    :root {
+      --bg: #050508;
+      --card: #0e0e14;
+      --border: #1e1e2e;
+      --accent: #7c6aff;
+      --accent2: #ff6a6a;
+      --mm: #F6851B;
+      --wc: #3B99FC;
+      --text: #f0f0f5;
+      --muted: #55556a;
+      --success: #4ade80;
+      --error: #f87171;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       min-height: 100vh;
+      background: var(--bg);
+      font-family: 'Syne', sans-serif;
+      color: var(--text);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #0d0d0d;
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Background blobs */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.12;
+      pointer-events: none;
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+
+    .blob-1 {
+      width: 500px; height: 500px;
+      background: var(--accent);
+      top: -150px; left: -150px;
+      animation-delay: 0s;
+    }
+
+    .blob-2 {
+      width: 400px; height: 400px;
+      background: var(--accent2);
+      bottom: -100px; right: -100px;
+      animation-delay: -6s;
+    }
+
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to { transform: translate(40px, 30px) scale(1.08); }
+    }
+
+    /* Grid overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(124,106,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,106,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 440px;
+      padding: 1.5rem;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .card {
-      background: #161616;
-      border: 1px solid #2a2a2a;
-      border-radius: 20px;
-      padding: 2.5rem 2rem;
-      max-width: 400px;
-      width: 90%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.5rem 2rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.6;
+    }
+
+    .header {
       text-align: center;
-    }
-
-    .mm-logo {
-      width: 72px;
-      height: 72px;
-      margin: 0 auto 1.5rem;
-    }
-
-    .token-name {
-      font-size: 24px;
-      font-weight: 600;
-      color: #ffffff;
-      margin-bottom: 4px;
-    }
-
-    .token-symbol {
-      font-size: 14px;
-      color: #666;
       margin-bottom: 2rem;
+    }
+
+    .logo-wrap {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.25rem;
+      background: linear-gradient(135deg, #1a1a2e, #0e0e1a);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .logo-wrap::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--accent), transparent 60%);
+      opacity: 0.3;
+      z-index: -1;
+    }
+
+    .logo-wrap svg { width: 48px; height: 48px; }
+
+    .network-name {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .network-sub {
+      font-size: 13px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.75rem 0;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
     }
 
     .btn {
       width: 100%;
-      padding: 14px;
+      padding: 15px 20px;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       color: #fff;
-      font-size: 16px;
-      font-weight: 600;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: 'Syne', sans-serif;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      transition: opacity 0.15s, transform 0.1s;
-      margin-bottom: 12px;
+      transition: all 0.2s ease;
+      margin-bottom: 10px;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.2px;
     }
 
-    .btn:hover { opacity: 0.88; }
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background 0.2s;
+    }
+
+    .btn:hover::after { background: rgba(255,255,255,0.07); }
     .btn:active { transform: scale(0.98); }
-    .btn-metamask { background: #F6851B; }
-    .btn-wc { background: #3B99FC; }
+
+    .btn-metamask {
+      background: linear-gradient(135deg, #F6851B, #e07315);
+      box-shadow: 0 4px 20px rgba(246,133,27,0.25);
+    }
+
+    .btn-metamask-mobile {
+      background: linear-gradient(135deg, #1e1e2e, #2a2a3e);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    .btn-wc {
+      background: linear-gradient(135deg, #3B99FC, #2a7fd4);
+      box-shadow: 0 4px 20px rgba(59,153,252,0.25);
+    }
 
     .btn-icon { width: 22px; height: 22px; flex-shrink: 0; }
-
-    .divider-text {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 0.5rem 0 1rem;
-      color: #444;
-      font-size: 12px;
-    }
-
-    .divider-text::before,
-    .divider-text::after {
-      content: '';
-      flex: 1;
-      border-top: 1px solid #2a2a2a;
-    }
 
     .status {
       margin-top: 1rem;
       font-size: 13px;
-      min-height: 20px;
-      color: #666;
+      min-height: 18px;
+      color: var(--muted);
+      text-align: center;
+      font-family: 'DM Mono', monospace;
+      transition: color 0.2s;
     }
 
-    .status.success { color: #4ade80; }
-    .status.error { color: #f87171; }
+    .status.success { color: var(--success); }
+    .status.error { color: var(--error); }
 
-    .divider {
-      border: none;
-      border-top: 1px solid #2a2a2a;
-      margin: 1.5rem 0;
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 1.5rem;
     }
 
-    .meta-row {
-      display: flex;
-      justify-content: space-between;
+    .meta-item {
+      background: rgba(124,106,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .meta-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .meta-value {
       font-size: 13px;
-      margin-bottom: 8px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-weight: 500;
     }
 
-    .meta-label { color: #666; }
-    .meta-value { color: #ccc; font-family: monospace; font-size: 12px; }
+    .meta-item.full { grid-column: 1 / -1; }
+
+    .footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <svg class="mm-logo" viewBox="0 0 256 240" xmlns="http://www.w3.org/2000/svg">
-      <polygon fill="#E17726" points="250.066,0.002 140.218,81.566 160.645,33.027"/>
-      <polygon fill="#E27625" points="6.191,0.002 115.289,82.285 95.677,33.027"/>
-      <polygon fill="#E27625" points="214.148,172.655 183.858,220.227 243.782,236.926 261.158,173.636"/>
-      <polygon fill="#E27625" points="0,173.636 17.341,236.926 77.23,220.227 46.975,172.655"/>
-      <polygon fill="#E27625" points="73.953,104.482 56.85,130.093 116.112,132.698 114.096,67.73"/>
-      <polygon fill="#E27625" points="182.293,104.482 141.682,67.006 140.218,132.698 199.446,130.093"/>
-      <polygon fill="#D5BFB2" points="77.23,220.227 112.534,202.915 81.878,174.059"/>
-      <polygon fill="#D5BFB2" points="143.722,202.915 179.061,220.227 174.377,174.059"/>
-      <polygon fill="#233447" points="179.061,220.227 143.722,202.915 146.687,228.793 146.358,236.239"/>
-      <polygon fill="#233447" points="77.23,220.227 109.898,236.239 109.604,228.793 112.534,202.915"/>
-      <polygon fill="#CC6228" points="110.527,161.715 81.045,153.118 101.062,143.638"/>
-      <polygon fill="#CC6228" points="145.729,161.715 155.194,143.638 175.245,153.118"/>
-      <polygon fill="#E27625" points="77.23,220.227 82.12,172.655 46.975,173.636"/>
-      <polygon fill="#E27625" points="174.136,172.655 179.061,220.227 209.281,173.636"/>
-      <polygon fill="#E27625" points="199.446,130.093 140.218,132.698 145.764,161.715 155.229,143.638 175.281,153.118"/>
-      <polygon fill="#E27625" points="81.045,153.118 101.097,143.638 110.527,161.715 116.112,132.698 56.85,130.093"/>
-      <polygon fill="#F5841F" points="56.85,130.093 81.045,153.118 72.068,175.957"/>
-      <polygon fill="#F5841F" points="184.188,175.957 175.245,153.118 199.446,130.093"/>
-      <polygon fill="#F5841F" points="116.112,132.698 110.527,161.715 117.524,196.952 119.094,150.199"/>
-      <polygon fill="#F5841F" points="140.218,132.698 137.162,150.164 138.731,196.952 145.764,161.715"/>
-      <polygon fill="#FEFEFE" points="145.764,161.715 138.731,196.952 143.722,202.915 175.245,153.118 184.188,175.957"/>
-      <polygon fill="#FEFEFE" points="81.045,153.118 110.527,161.715 112.534,202.915 117.524,196.952 116.112,132.698"/>
-      <polygon fill="#E27625" points="146.358,236.239 146.687,228.793 143.957,226.404 112.299,226.404 109.604,228.793 109.898,236.239 77.23,220.227 88.376,229.34 112.025,245.994 144.231,245.994 167.915,229.34 179.061,220.227"/>
-      <polygon fill="#CC6228" points="143.722,202.915 138.731,196.952 117.524,196.952 112.534,202.915 109.604,228.793 112.299,226.404 143.957,226.404 146.687,228.793"/>
-      <polygon fill="#F5841F" points="254.526,84.308 262.988,43.006 250.066,0.002 143.722,78.443 182.293,104.482 242.527,122.174 255.964,106.806 250.376,102.713 259.319,94.427 252.395,89.038 261.338,82.145"/>
-      <polygon fill="#F5841F" points="0,43.006 8.463,84.308 2.84,82.145 11.783,89.038 4.894,94.427 13.837,102.713 8.249,106.806 21.651,122.174 81.885,104.482 120.456,78.443 14.112,0.002"/>
-    </svg>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
 
-    <p class="token-name">ETH</p>
-    <p class="token-symbol">Add network to your wallet</p>
+  <div class="wrapper">
+    <div class="card">
+      <div class="header">
+        <div class="logo-wrap">
+          <svg viewBox="0 0 256 240" xmlns="http://www.w3.org/2000/svg">
+            <polygon fill="#E17726" points="250.066,0.002 140.218,81.566 160.645,33.027"/>
+            <polygon fill="#E27625" points="6.191,0.002 115.289,82.285 95.677,33.027"/>
+            <polygon fill="#E27625" points="214.148,172.655 183.858,220.227 243.782,236.926 261.158,173.636"/>
+            <polygon fill="#E27625" points="0,173.636 17.341,236.926 77.23,220.227 46.975,172.655"/>
+            <polygon fill="#E27625" points="73.953,104.482 56.85,130.093 116.112,132.698 114.096,67.73"/>
+            <polygon fill="#E27625" points="182.293,104.482 141.682,67.006 140.218,132.698 199.446,130.093"/>
+            <polygon fill="#D5BFB2" points="77.23,220.227 112.534,202.915 81.878,174.059"/>
+            <polygon fill="#D5BFB2" points="143.722,202.915 179.061,220.227 174.377,174.059"/>
+            <polygon fill="#233447" points="179.061,220.227 143.722,202.915 146.687,228.793 146.358,236.239"/>
+            <polygon fill="#233447" points="77.23,220.227 109.898,236.239 109.604,228.793 112.534,202.915"/>
+            <polygon fill="#CC6228" points="110.527,161.715 81.045,153.118 101.062,143.638"/>
+            <polygon fill="#CC6228" points="145.729,161.715 155.194,143.638 175.245,153.118"/>
+            <polygon fill="#E27625" points="77.23,220.227 82.12,172.655 46.975,173.636"/>
+            <polygon fill="#E27625" points="174.136,172.655 179.061,220.227 209.281,173.636"/>
+            <polygon fill="#E27625" points="199.446,130.093 140.218,132.698 145.764,161.715 155.229,143.638 175.281,153.118"/>
+            <polygon fill="#E27625" points="81.045,153.118 101.097,143.638 110.527,161.715 116.112,132.698 56.85,130.093"/>
+            <polygon fill="#F5841F" points="56.85,130.093 81.045,153.118 72.068,175.957"/>
+            <polygon fill="#F5841F" points="184.188,175.957 175.245,153.118 199.446,130.093"/>
+            <polygon fill="#F5841F" points="116.112,132.698 110.527,161.715 117.524,196.952 119.094,150.199"/>
+            <polygon fill="#F5841F" points="140.218,132.698 137.162,150.164 138.731,196.952 145.764,161.715"/>
+            <polygon fill="#FEFEFE" points="145.764,161.715 138.731,196.952 143.722,202.915 175.245,153.118 184.188,175.957"/>
+            <polygon fill="#FEFEFE" points="81.045,153.118 110.527,161.715 112.534,202.915 117.524,196.952 116.112,132.698"/>
+            <polygon fill="#E27625" points="146.358,236.239 146.687,228.793 143.957,226.404 112.299,226.404 109.604,228.793 109.898,236.239 77.23,220.227 88.376,229.34 112.025,245.994 144.231,245.994 167.915,229.34 179.061,220.227"/>
+            <polygon fill="#CC6228" points="143.722,202.915 138.731,196.952 117.524,196.952 112.534,202.915 109.604,228.793 112.299,226.404 143.957,226.404 146.687,228.793"/>
+            <polygon fill="#F5841F" points="254.526,84.308 262.988,43.006 250.066,0.002 143.722,78.443 182.293,104.482 242.527,122.174 255.964,106.806 250.376,102.713 259.319,94.427 252.395,89.038 261.338,82.145"/>
+            <polygon fill="#F5841F" points="0,43.006 8.463,84.308 2.84,82.145 11.783,89.038 4.894,94.427 13.837,102.713 8.249,106.806 21.651,122.174 81.885,104.482 120.456,78.443 14.112,0.002"/>
+          </svg>
+        </div>
+        <h1 class="network-name">Ethereum</h1>
+        <p class="network-sub">chain id: 9991 · currency: ETH</p>
+      </div>
 
-    <button class="btn btn-metamask" onclick="addMetaMask()">
-      <svg class="btn-icon" viewBox="0 0 256 240" xmlns="http://www.w3.org/2000/svg">
-        <polygon fill="#fff" points="250.066,0.002 140.218,81.566 160.645,33.027"/>
-        <polygon fill="#fff" opacity="0.8" points="6.191,0.002 115.289,82.285 95.677,33.027"/>
-      </svg>
-      Add via MetaMask
-    </button>
+      <p class="section-label">Add Network</p>
 
-    <div class="divider-text">or</div>
+      <button class="btn btn-metamask" onclick="addMetaMask()">
+        <svg class="btn-icon" viewBox="0 0 256 240" xmlns="http://www.w3.org/2000/svg">
+          <polygon fill="#fff" points="250.066,0.002 140.218,81.566 160.645,33.027"/>
+          <polygon fill="#fff" opacity="0.7" points="6.191,0.002 115.289,82.285 95.677,33.027"/>
+        </svg>
+        MetaMask — Browser Extension
+      </button>
 
-    <button class="btn btn-wc" onclick="addWalletConnect()">
-      <svg class="btn-icon" viewBox="0 0 300 185" xmlns="http://www.w3.org/2000/svg">
-        <path d="M61.4 36.3c48.9-47.9 128.2-47.9 177.1 0l5.9 5.8c2.4 2.4 2.4 6.2 0 8.6l-20.2 19.8c-1.2 1.2-3.1 1.2-4.3 0l-8.1-7.9c-34.1-33.4-89.4-33.4-123.5 0l-8.7 8.5c-1.2 1.2-3.1 1.2-4.3 0L55.1 50.3c-2.4-2.4-2.4-6.2 0-8.6l6.3-5.4zm218.6 40.7l18 17.6c2.4 2.4 2.4 6.2 0 8.6L205.3 183c-2.4 2.4-6.2 2.4-8.6 0l-57.8-56.6c-.6-.6-1.6-.6-2.2 0L79 183c-2.4 2.4-6.2 2.4-8.6 0L-1.8 103.2c-2.4-2.4-2.4-6.2 0-8.6l18-17.6c2.4-2.4 6.2-2.4 8.6 0l57.8 56.6c.6.6 1.6.6 2.2 0l57.8-56.6c2.4-2.4 6.2-2.4 8.6 0l57.8 56.6c.6.6 1.6.6 2.2 0l57.8-56.6c2.3-2.4 6.2-2.4 8.6 0z" fill="#fff"/>
-      </svg>
-      Add via WalletConnect
-    </button>
+      <button class="btn btn-metamask-mobile" onclick="openMetaMaskMobile()">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="2"/>
+          <line x1="12" y1="18" x2="12" y2="18.01"/>
+        </svg>
+        MetaMask — Mobile App
+      </button>
 
-    <p class="status" id="status"></p>
+      <button class="btn btn-wc" onclick="addWalletConnect()">
+        <svg class="btn-icon" viewBox="0 0 300 185" xmlns="http://www.w3.org/2000/svg">
+          <path d="M61.4 36.3c48.9-47.9 128.2-47.9 177.1 0l5.9 5.8c2.4 2.4 2.4 6.2 0 8.6l-20.2 19.8c-1.2 1.2-3.1 1.2-4.3 0l-8.1-7.9c-34.1-33.4-89.4-33.4-123.5 0l-8.7 8.5c-1.2 1.2-3.1 1.2-4.3 0L55.1 50.3c-2.4-2.4-2.4-6.2 0-8.6l6.3-5.4zm218.6 40.7l18 17.6c2.4 2.4 2.4 6.2 0 8.6L205.3 183c-2.4 2.4-6.2 2.4-8.6 0l-57.8-56.6c-.6-.6-1.6-.6-2.2 0L79 183c-2.4 2.4-6.2 2.4-8.6 0L-1.8 103.2c-2.4-2.4-2.4-6.2 0-8.6l18-17.6c2.4-2.4 6.2-2.4 8.6 0l57.8 56.6c.6.6 1.6.6 2.2 0l57.8-56.6c2.4-2.4 6.2-2.4 8.6 0l57.8 56.6c.6.6 1.6.6 2.2 0l57.8-56.6c2.3-2.4 6.2-2.4 8.6 0z" fill="#fff"/>
+        </svg>
+        WalletConnect — Onchain & Others
+      </button>
 
-    <hr class="divider">
+      <p class="status" id="status"></p>
 
-    <div class="meta-row">
-      <span class="meta-label">Network Name</span>
-      <span class="meta-value" style="font-family: 'Segoe UI', sans-serif;">ETH</span>
+      <div class="meta-grid">
+        <div class="meta-item">
+          <p class="meta-label">Chain ID</p>
+          <p class="meta-value">9991</p>
+        </div>
+        <div class="meta-item">
+          <p class="meta-label">Currency</p>
+          <p class="meta-value">ETH</p>
+        </div>
+        <div class="meta-item full">
+          <p class="meta-label">RPC Endpoint</p>
+          <p class="meta-value" style="font-size:11px; word-break:break-all;">virtual.mainnet.eu.rpc.tenderly.co</p>
+        </div>
+      </div>
     </div>
-    <div class="meta-row">
-      <span class="meta-label">Chain ID</span>
-      <span class="meta-value">9991</span>
-    </div>
-    <div class="meta-row">
-      <span class="meta-label">Currency</span>
-      <span class="meta-value">ETH</span>
-    </div>
+
+    <p class="footer">Powered by Tenderly · Mainnet Fork</p>
   </div>
 
   <script>
     const NETWORK = {
       chainId: '0x2707',
-      chainName: 'ETH',
+      chainName: 'Ethereum',
       nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
       rpcUrls: ['https://virtual.mainnet.eu.rpc.tenderly.co/d68f8fc9-35e6-46c9-b43d-c8fe52ce1c84'],
       blockExplorerUrls: [],
@@ -201,7 +379,7 @@
 
     async function addMetaMask() {
       if (typeof window.ethereum === 'undefined') {
-        setStatus('MetaMask not detected. Please install it first.', 'error');
+        setStatus('MetaMask extension not detected. Try the mobile button below.', 'error');
         return;
       }
       try {
@@ -209,38 +387,69 @@
           method: 'wallet_addEthereumChain',
           params: [NETWORK],
         });
-        setStatus('ETH successfully added to MetaMask!', 'success');
+        setStatus('Ethereum added to MetaMask!', 'success');
       } catch (err) {
         if (err.code === 4001) {
-          setStatus('Network addition was cancelled.');
+          setStatus('Cancelled.');
         } else {
           setStatus('Something went wrong. Please try again.', 'error');
         }
       }
     }
 
+    function openMetaMaskMobile() {
+  addMetaMask();
+}
+
     async function addWalletConnect() {
       try {
-        setStatus('Connecting wallet...');
-        const provider = new WalletConnectProvider.default({
-          projectId: WC_PROJECT_ID,
-          rpc: {
-            9991: 'https://virtual.mainnet.eu.rpc.tenderly.co/d68f8fc9-35e6-46c9-b43d-c8fe52ce1c84',
-            1: 'https://cloudflare-eth.com',
+        setStatus('Opening WalletConnect...');
+
+        const { WalletConnectModal } = window.WalletConnectModal || {};
+        const { SignClient } = window.SignClient || {};
+
+        if (!WalletConnectModal || !SignClient) {
+          setStatus('WalletConnect is loading, please try again in a moment.', 'error');
+          return;
+        }
+
+        const modal = new WalletConnectModal({ projectId: WC_PROJECT_ID });
+        const client = await SignClient.init({ projectId: WC_PROJECT_ID });
+
+        const { uri, approval } = await client.connect({
+          requiredNamespaces: {
+            eip155: {
+              methods: ['wallet_addEthereumChain', 'eth_requestAccounts'],
+              chains: ['eip155:1'],
+              events: ['chainChanged', 'accountsChanged'],
+            },
           },
         });
 
-        await provider.enable();
+        if (uri) {
+          modal.openModal({ uri });
+          const session = await approval();
+          modal.closeModal();
 
-        await provider.request({
-          method: 'wallet_addEthereumChain',
-          params: [NETWORK],
-        });
+          const topic = session.topic;
+          const accounts = Object.values(session.namespaces)
+            .flatMap(ns => ns.accounts)
+            .map(a => a.split(':')[2]);
 
-        setStatus('ETH successfully added to your wallet!', 'success');
+          await client.request({
+            topic,
+            chainId: 'eip155:1',
+            request: {
+              method: 'wallet_addEthereumChain',
+              params: [NETWORK],
+            },
+          });
+
+          setStatus('Ethereum added to your wallet!', 'success');
+        }
       } catch (err) {
-        if (err.message && err.message.includes('User closed')) {
-          setStatus('Connection cancelled.');
+        if (err.message && (err.message.includes('closed') || err.message.includes('cancelled'))) {
+          setStatus('Cancelled.');
         } else {
           setStatus('Something went wrong. Please try again.', 'error');
         }
