@@ -404,8 +404,8 @@
     }
   }
 }
-    function openMetaMaskMobile() {
-  addMetaMask();
+  function openMetaMaskMobile() {
+  window.location.href = `https://metamask.app.link/dapp/${window.location.host}`;
 }
 
     async function addWalletConnect() {
