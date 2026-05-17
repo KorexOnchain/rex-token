@@ -379,11 +379,18 @@
 
     async function addMetaMask() {
   try {
-    const provider = window.ethereum || window.web3?.currentProvider;
+    let provider = window.ethereum || window.web3?.currentProvider;
+    
+    if (!provider) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      provider = window.ethereum || window.web3?.currentProvider;
+    }
+
     if (!provider) {
       setStatus('MetaMask not detected. Please open this page inside the MetaMask browser.', 'error');
       return;
     }
+
     await provider.request({
       method: 'wallet_addEthereumChain',
       params: [NETWORK],
