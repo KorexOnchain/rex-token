@@ -389,6 +389,7 @@
         });
         setStatus('Ethereum added to MetaMask!', 'success');
       } catch (err) {
+        console.log(err);
         if (err.code === 4001) {
           setStatus('Cancelled.');
         } else {
